@@ -1,9 +1,16 @@
+// WinDbg js runtime specific script
+// Takes a list of Win32K system calls to listen for and sets a breakpoint to
+// log the current call stack then continue debugging
+
+// Formatting/Linting hasn't really been maintained here to not pollute
+// the git history
+
 "use strict";
 
+// These are all called from the core event loop, and are thus incredibly
+// high volume, making the browser basically unusable if they're logged.
+// We're already aware that they're an issue, so don't log them for now.
 const EXCLUDED_WIN32K_SYSCALLS = [
-    // These are all called from the core event loop, and are thus incredibly
-    // high volume, making the browser basically unusable if they're logged.
-    // We're already aware that they're an issue, so don't log them for now.
     "NtUserPeekMessage",
     "NtUserValidateHandleSecure",
     "NtUserPostMessage",
@@ -13,6 +20,7 @@ const EXCLUDED_WIN32K_SYSCALLS = [
 ];
 
 // List generated on Windows 10 (1809) Build 10.0.17763
+// List of available Win32K system calls given by `npm run stubs`
 const WIN32K_SYSCALLS = [
     "NtBindCompositionSurface",
     "NtCompositionInputThread",
@@ -32,13 +40,11 @@ const WIN32K_SYSCALLS = [
     "NtDCompositionCreateDwmChannel",
     "NtDCompositionCreateSharedVisualHandle",
     "NtDCompositionCreateSynchronizationObject",
-    "NtDCompositionCurrentBatchId",
     "NtDCompositionDestroyChannel",
     "NtDCompositionDestroyConnection",
     "NtDCompositionDiscardFrame",
     "NtDCompositionDuplicateHandleToProcess",
     "NtDCompositionDuplicateSwapchainHandleToDwm",
-    "NtDCompositionEnableDDASupport",
     "NtDCompositionEnableMMCSS",
     "NtDCompositionGetBatchId",
     "NtDCompositionGetChannels",
@@ -55,7 +61,6 @@ const WIN32K_SYSCALLS = [
     "NtDCompositionReleaseAllResources",
     "NtDCompositionRemoveCrossDeviceVisualChild",
     "NtDCompositionRetireFrame",
-    "NtDCompositionSetChannelCallbackId",
     "NtDCompositionSetChannelCommitCompletionEvent",
     "NtDCompositionSetChannelConnectionId",
     "NtDCompositionSetChildRootVisual",
@@ -63,7 +68,6 @@ const WIN32K_SYSCALLS = [
     "NtDCompositionSetMaterialProperty",
     "NtDCompositionSubmitDWMBatch",
     "NtDCompositionSuspendAnimations",
-    "NtDCompositionSyncWait",
     "NtDCompositionSynchronize",
     "NtDCompositionTelemetryAnimationScenarioBegin",
     "NtDCompositionTelemetryAnimationScenarioReference",
@@ -136,32 +140,13 @@ const WIN32K_SYSCALLS = [
     "NtGdiCreateServerMetaFile",
     "NtGdiCreateSessionMappedDIBSection",
     "NtGdiCreateSolidBrush",
-    "NtGdiD3dContextCreate",
-    "NtGdiD3dContextDestroy",
-    "NtGdiD3dContextDestroyAll",
-    "NtGdiD3dDrawPrimitives2",
-    "NtGdiD3dValidateTextureStageState",
     "NtGdiDDCCIGetCapabilitiesString",
     "NtGdiDDCCIGetCapabilitiesStringLength",
     "NtGdiDDCCIGetTimingReport",
     "NtGdiDDCCIGetVCPFeature",
     "NtGdiDDCCISaveCurrentSettings",
     "NtGdiDDCCISetVCPFeature",
-    "NtGdiDdAddAttachedSurface",
-    "NtGdiDdAlphaBlt",
-    "NtGdiDdAttachSurface",
-    "NtGdiDdBeginMoCompFrame",
-    "NtGdiDdBlt",
-    "NtGdiDdCanCreateD3DBuffer",
-    "NtGdiDdCanCreateSurface",
-    "NtGdiDdColorControl",
-    "NtGdiDdCreateD3DBuffer",
-    "NtGdiDdCreateDirectDrawObject",
     "NtGdiDdCreateFullscreenSprite",
-    "NtGdiDdCreateMoComp",
-    "NtGdiDdCreateSurface",
-    "NtGdiDdCreateSurfaceEx",
-    "NtGdiDdCreateSurfaceObject",
     "NtGdiDdDDIAbandonSwapChain",
     "NtGdiDdDDIAcquireKeyedMutex",
     "NtGdiDdDDIAcquireKeyedMutex2",
@@ -234,9 +219,7 @@ const WIN32K_SYSCALLS = [
     "NtGdiDdDDIGetOverlayState",
     "NtGdiDdDDIGetPostCompositionCaps",
     "NtGdiDdDDIGetPresentHistory",
-    "NtGdiDdDDIGetPresentHistoryInternal",
     "NtGdiDdDDIGetPresentQueueEvent",
-    "NtGdiDdDDIGetPresentStatsInternal",
     "NtGdiDdDDIGetProcessDeviceRemovalSupport",
     "NtGdiDdDDIGetProcessSchedulingPriorityBand",
     "NtGdiDdDDIGetProcessSchedulingPriorityClass",
@@ -332,7 +315,6 @@ const WIN32K_SYSCALLS = [
     "NtGdiDdDDISetSyncRefreshCountWaitTarget",
     "NtGdiDdDDISetVidPnSourceHwProtection",
     "NtGdiDdDDISetVidPnSourceOwner",
-    "NtGdiDdDDISetVidPnSourceOwner1",
     "NtGdiDdDDISetYieldPercentage",
     "NtGdiDdDDIShareObjects",
     "NtGdiDdDDISharedPrimaryLockNotification",
@@ -359,46 +341,9 @@ const WIN32K_SYSCALLS = [
     "NtGdiDdDDIWaitForSynchronizationObjectFromGpu",
     "NtGdiDdDDIWaitForVerticalBlankEvent",
     "NtGdiDdDDIWaitForVerticalBlankEvent2",
-    "NtGdiDdDeleteDirectDrawObject",
-    "NtGdiDdDeleteSurfaceObject",
-    "NtGdiDdDestroyD3DBuffer",
     "NtGdiDdDestroyFullscreenSprite",
-    "NtGdiDdDestroyMoComp",
-    "NtGdiDdDestroySurface",
-    "NtGdiDdEndMoCompFrame",
-    "NtGdiDdFlip",
-    "NtGdiDdFlipToGDISurface",
-    "NtGdiDdGetAvailDriverMemory",
-    "NtGdiDdGetBltStatus",
-    "NtGdiDdGetDC",
-    "NtGdiDdGetDriverInfo",
-    "NtGdiDdGetDriverState",
-    "NtGdiDdGetDxHandle",
-    "NtGdiDdGetFlipStatus",
-    "NtGdiDdGetInternalMoCompInfo",
-    "NtGdiDdGetMoCompBuffInfo",
-    "NtGdiDdGetMoCompFormats",
-    "NtGdiDdGetMoCompGuids",
-    "NtGdiDdGetScanLine",
-    "NtGdiDdLock",
-    "NtGdiDdLockD3D",
     "NtGdiDdNotifyFullscreenSpriteUpdate",
-    "NtGdiDdQueryDirectDrawObject",
-    "NtGdiDdQueryMoCompStatus",
     "NtGdiDdQueryVisRgnUniqueness",
-    "NtGdiDdReenableDirectDrawObject",
-    "NtGdiDdReleaseDC",
-    "NtGdiDdRenderMoComp",
-    "NtGdiDdResetVisrgn",
-    "NtGdiDdSetColorKey",
-    "NtGdiDdSetExclusiveMode",
-    "NtGdiDdSetGammaRamp",
-    "NtGdiDdSetOverlayPosition",
-    "NtGdiDdUnattachSurface",
-    "NtGdiDdUnlock",
-    "NtGdiDdUnlockD3D",
-    "NtGdiDdUpdateOverlay",
-    "NtGdiDdWaitForVerticalBlank",
     "NtGdiDeleteClientObj",
     "NtGdiDeleteColorSpace",
     "NtGdiDeleteColorTransform",
@@ -410,26 +355,7 @@ const WIN32K_SYSCALLS = [
     "NtGdiDoPalette",
     "NtGdiDrawEscape",
     "NtGdiDrawStream",
-    "NtGdiDvpAcquireNotification",
-    "NtGdiDvpCanCreateVideoPort",
-    "NtGdiDvpColorControl",
-    "NtGdiDvpCreateVideoPort",
-    "NtGdiDvpDestroyVideoPort",
-    "NtGdiDvpFlipVideoPort",
-    "NtGdiDvpGetVideoPortBandwidth",
-    "NtGdiDvpGetVideoPortConnectInfo",
-    "NtGdiDvpGetVideoPortField",
-    "NtGdiDvpGetVideoPortFlipStatus",
-    "NtGdiDvpGetVideoPortInputFormats",
-    "NtGdiDvpGetVideoPortLine",
-    "NtGdiDvpGetVideoPortOutputFormats",
-    "NtGdiDvpGetVideoSignalStatus",
-    "NtGdiDvpReleaseNotification",
-    "NtGdiDvpUpdateVideoPort",
-    "NtGdiDvpWaitForVideoPortSync",
     "NtGdiDwmCreatedBitmapRemotingOutput",
-    "NtGdiDxgGenericThunk",
-    "NtGdiEllipse",
     "NtGdiEnableEudc",
     "NtGdiEndDoc",
     "NtGdiEndGdiRendering",
@@ -486,12 +412,10 @@ const WIN32K_SYSCALLS = [
     "NtGdiFONTOBJ_pvTrueTypeFontFile",
     "NtGdiFONTOBJ_pxoGetXform",
     "NtGdiFONTOBJ_vGetInfo",
-    "NtGdiFastPolyPolyline",
     "NtGdiFillPath",
     "NtGdiFillRgn",
     "NtGdiFlattenPath",
     "NtGdiFlush",
-    "NtGdiFlushUserBatch",
     "NtGdiFontIsLinked",
     "NtGdiForceUFIMapping",
     "NtGdiFrameRgn",
@@ -516,7 +440,6 @@ const WIN32K_SYSCALLS = [
     "NtGdiGetColorAdjustment",
     "NtGdiGetColorSpaceforBitmap",
     "NtGdiGetCurrentDpiInfo",
-    "NtGdiGetCurrentDpiInfoFromHDev",
     "NtGdiGetDCDpiScaleValue",
     "NtGdiGetDCDword",
     "NtGdiGetDCObject",
@@ -697,7 +620,6 @@ const WIN32K_SYSCALLS = [
     "NtGdiXLATEOBJ_iXlate",
     "NtHWCursorUpdatePointer",
     "NtMITActivateInputProcessing",
-    "NtMITBindInputTypeToMonitors",
     "NtMITCoreMsgKGetConnectionHandle",
     "NtMITCoreMsgKOpenConnectionTo",
     "NtMITCoreMsgKSend",
@@ -745,7 +667,6 @@ const WIN32K_SYSCALLS = [
     "NtSetCompositionSurfaceAnalogExclusive",
     "NtSetCompositionSurfaceBufferUsage",
     "NtSetCompositionSurfaceDirectFlipState",
-    "NtSetCompositionSurfaceHDRMetaData",
     "NtSetCompositionSurfaceIndependentFlipInfo",
     "NtSetCompositionSurfaceStatistics",
     "NtTokenManagerConfirmOutstandingAnalogToken",
@@ -914,7 +835,6 @@ const WIN32K_SYSCALLS = [
     "NtUserGetCurrentDpiInfoForWindow",
     "NtUserGetCurrentInputMessageSource",
     "NtUserGetCursor",
-    "NtUserGetCursorDims",
     "NtUserGetCursorFrameInfo",
     "NtUserGetCursorInfo",
     "NtUserGetDC",
@@ -1291,7 +1211,6 @@ const WIN32K_SYSCALLS = [
     "NtUserWaitForMsgAndEvent",
     "NtUserWaitForRedirectionStartComplete",
     "NtUserWaitMessage",
-    "NtUserWin32kSysCallFilterStub",
     "NtUserWindowFromDC",
     "NtUserWindowFromPhysicalPoint",
     "NtUserWindowFromPoint",
@@ -1300,10 +1219,12 @@ const WIN32K_SYSCALLS = [
     "NtVisualCaptureBits"
 ];
 
+// Execute windbg console command
 function _executeCommand(cmd) {
     host.namespace.Debugger.Utility.Control.ExecuteCommand(cmd);
 }
 
+// Convert NatVis decimal buffer into a human readable string
 function decimalBufferToString(buf, len) {
     var str = "";
 
@@ -1314,6 +1235,8 @@ function decimalBufferToString(buf, len) {
     return str;
 }
 
+// WinDbg js runtime entry point
+// Runs at the start of each debugged process
 function invokeScript() {
     let cl = decimalBufferToString(
         host.currentProcess.Environment.EnvironmentBlock.ProcessParameters.CommandLine.Buffer,
@@ -1330,6 +1253,12 @@ function invokeScript() {
             continue;
         }
         _executeCommand(
+            // The list of commands given to WinDbg break down into this:
+            // set breakpoint at syscall and when breakpoint is hit (bp)
+            //    echo ===WIN32K-START=== (.echo)
+            //    echo the current call stack (k)
+            //    echo ===WIN32K-END=== (.echo)
+            //    then continue debugging (g)
             `bp WIN32U!${syscall} ".echo '===WIN32K-START==='; k; .echo '===WIN32K-END==='; g"`
         );
     }

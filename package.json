@@ -1,0 +1,21 @@
+{
+  "name": "awcw32ky-client",
+  "version": "1.0.0",
+  "description": "are we content win32k yet test client package",
+  "main": "app.js",
+  "scripts": {
+    "stubs": "echo \"Todo: enter stub generation script call here\" && exit 1",
+    "start": "echo \"Todo: enter start script call here \" && exit 1",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/metalcanine/awcw32ky-client.git"
+  },
+  "author": "Mozilla Platform Security",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/metalcanine/awcw32ky-client/issues"
+  },
+  "homepage": "https://github.com/metalcanine/awcw32ky-client#readme"
+}
