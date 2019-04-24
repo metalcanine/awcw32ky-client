@@ -2,9 +2,9 @@
   "name": "awcw32ky-client",
   "version": "1.0.0",
   "description": "are we content win32k yet test client package",
-  "main": "app.js",
+  "main": "client.js",
   "scripts": {
-    "stubs": "echo \"Todo: enter stub generation script call here\" && exit 1",
+    "stubs": "/c/Program\\ Files\\ \\(x86\\)/Microsoft\\ Visual\\ Studio/2017/Community/VC/Tools/MSVC/14.10.25017/bin/HostX64/x64/dumpbin.exe //EXPORTS /c/Windows/System32/{win32kfull.sys,gdi32full.dll,user32.dll,win32k.sys,win32kbase.sys,win32u.sys} | grep -E “Nt(User|Gdi|DC)” | awk ‘{print $4}’ | grep -v “^__win32kstub” | sort | uniq > calls.txt",
     "start": "echo \"Todo: enter start script call here \" && exit 1",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
