@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# logs
+*.log
+
+# node
+node_modules/
+
+# npm
+node_modules/
+.npm
+npm-debug.log*
+build/bundle.js
+build/index.html
+build*
+build/*
