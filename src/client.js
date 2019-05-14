@@ -12,7 +12,7 @@ program.version(process.env.npm_package_version)
   .option('-c, client', 'start client package for running awcw32ky jobs')
   .parse(process.argv);
 
-// generate an slightly random alphanumeric id
+// generate a slightly random alphanumeric id
 const makeId = (length) => {
   return 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
     .split('')
@@ -147,7 +147,7 @@ const processWin32KTraces = (file_path, xul_frames, stacks) => {
 // windbg commands to be executed
 let windbg_init_script = `
 * Set up logging to a file
-.logappend C:\Users\june\Source\win32k-stuff\win32k-log.txt
+.logappend ${process.cwd()}\\logs\\stand\\${Date.now() + makeId(12)}.log
 
 * We want to debug our children. Strictly speaking we don't even care about
 * debugging ourselves!
@@ -157,7 +157,7 @@ let windbg_init_script = `
 .load jsprovider.dll
 
 * Set up an exception handler for initial breakpoint to set up tracing
-sxe -c ".scriptrun C:\\Users\\june\\Source\\win32k-stuff\\win32k-tracing.js; g" ibp
+sxe -c ".scriptrun ${process.cwd().replace(/\\/gi, "\\\\")}\\\\src\\\\win32k-tracing.js; g" ibp
 * Ignore all other exceptions (TODO: should this be 'sxd *'?)
 sxn -c "gn" \*
 * Ignore end process
@@ -166,15 +166,6 @@ sxd epr
 * And we're of!
 gc
 `;
-
-if (process.env.LOCAL_FIREFOX_REPO) {
-  const mach_call = `python ${path.join(process.env.LOCAL_FIREFOX_REPO, 'mach')} run` +
-    ` --debugger=\"c:/Program Files (x86)/Windows Kits/10/Debuggers/x64/windbg.exe\"` +
-    ` --debugger-args="-c '\$\$<${path.join(process.cwd(), 'temp/dbg-script.txt')}' "`;
-}
-else {
-  console.error('No Firefox repo location defined in env variables');
-}
 
 // make sure that we have all of our folders
 if (!fs.existsSync('logs/')) {
@@ -190,18 +181,30 @@ if (!fs.existsSync('temp/')) {
   fs.mkdirSync('temp/');
 }
 
+// write debug script out to file to sidestep having to
+fs.writeFileSync('temp/dbg-script.txt', windbg_init_script);
+
 // const main = () => {
 if (program.standalone) {
-  console.log('starting firefox');
-  exec(mach_call, (error, stdout, stderr) => {
-    if (error) {
-      console.log(stderr);
-      throw error;
-    }
-    else {
-      console.log(stdout);
-    }
-  });
+  if (process.env.LOCAL_FIREFOX_REPO) {
+    const mach_call = `python ${path.join(process.env.LOCAL_FIREFOX_REPO, 'mach')} run` +
+      ` --debugger=\"c:/Program Files (x86)/Windows Kits/10/Debuggers/x64/windbg.exe\"` +
+      ` --debugger-args="-c '\$\$<${path.join(process.cwd(), 'temp/dbg-script.txt')}' "`;
+
+    console.log('starting firefox');
+    exec(mach_call, (error, stdout, stderr) => {
+      if (error) {
+        console.log(stderr);
+        throw error;
+      }
+      else {
+        console.log(stdout);
+      }
+    });
+  }
+  else {
+    console.error('No Firefox repo location defined in env variables');
+  }
 }
 else if (program.client) {
   console.log('client');
