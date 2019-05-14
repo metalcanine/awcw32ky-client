@@ -1,32 +1,25 @@
 #!/usr/bin/env node
 
+require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
+const { exec } = require("child_process");
+const program = require("commander");
 
-// globals
-const STACK_TRACE_HEADER = "'===WIN32K-START==='";
-const STACK_TRACE_FOOTER = "'===WIN32K-END==='";
-const windbg_init_script = `
-* Set up logging to a file
-.logappend C:\Users\june\Source\awcw32ky-client\win32k-log.txt;
+// commander setup
+program.version(process.env.npm_package_version)
+  .option('-s, standalone', 'start firefox under windbg')
+  .option('-c, client', 'start client package for running awcw32ky jobs')
+  .parse(process.argv);
 
-* We want to debug our children. Strictly speaking we don't even care about
-* debugging ourselves!
-.childdbg 1;
-
-* Load up the JS provider
-.load jsprovider.dll;
-
-* Set up an exception handler for initial breakpoint to set up tracing
-sxe -c ".scriptrun C:\\\\Users\\\\june\\\\Source\\\\awcw32ky-client\\\\win32k-tracing.js; g" ibp;
-* Ignore all other exceptions (TODO: should this be 'sxd *'?)
-sxe -c "g" *;
-* Ignore end process
-sxd epr;
-
-* And we're off!
-gc;
-`;
+// generate an slightly random alphanumeric id
+const makeId = (length) => {
+  return 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    .split('')
+    .sort(() => { return 0.5 - Math.random(); })
+    .slice(0, length)
+    .join('');
+}
 
 const convertLogToJSON = data => {
   let log = [];
@@ -100,15 +93,11 @@ const extractFrames = (stack, xul_frames) => {
   return frames;
 };
 
-const processWin32KTraces = () => {};
+const processWin32KTraces = (file_path, xul_frames, stacks) => {
+  // log stack trace bookends
+  const STACK_TRACE_HEADER = "'===WIN32K-START==='";
+  const STACK_TRACE_FOOTER = "'===WIN32K-END==='";
 
-// @click.command()
-// @click.argument("path")
-// @click.option("--xul-frames", default=None, type=click.INT)
-// @click.option("--stacks", default=None, type=click.INT)
-// @click.option("--select", default=None, multiple=True)
-// @click.option("--exclude", default=None, multiple=True)
-const main = (file_path, xul_frames, stacks, select, exclude) => {
   let log_contents = fs
     .readFileSync(file_path)
     .toString()
@@ -119,41 +108,31 @@ const main = (file_path, xul_frames, stacks, select, exclude) => {
   let sections = [];
 
   while (true) {
-    try {
-      let start_idx;
-      let end_idx;
-    } catch (error) {
-      break;
-    }
-
+    let start_idx;
+    let end_idx;
     let success = true;
-    try {
-      //             start_idx = lines.index(STACK_TRACE_HEADER, idx + 1)
-      start_idx = log_contents.find((element) => {element === STACK_TRACE_HEADER});
-      //             end_idx = lines.index(STACK_TRACE_FOOTER, start_idx + 1)
-    } catch (error) {
+
+    start_idx = log_contents.findIndex((element) => { element === STACK_TRACE_HEADER });
+    end_idx = log_contents.findIndex((element) => { element === STACK_TRACE_FOOTER });
+
+    if (!start_idx && !end_idx) {
       success = false;
       break;
     }
+
     if (success) {
-      sections += lines[]
-      //             sections.append(lines[start_idx:end_idx])
-      //             idx = end_idx
+      sections += log_contents.slice(start_idx, end_idx);
+      idx = end_idx;
     }
   }
 
-  // c = collections.Counter()
-  let c = 0;
+  let c;
 
   for (section in sections) {
-    //         if select and not any(any(f in s for f in select) for s in section):
-    //             continue
-    //         if exclude and any(any(e in s for e in exclude) for s in section):
-    //             continue
-    //         c[tuple(extract_frames(section, xul_frames))] += 1
+    // c[tuple(extract_frames(section, xul_frames))] += 1
   }
 
-  stacks.forEach((stack, count) => {
+  c.forEach((stack, count) => {
     console.log(`${count} - ${stack[0]}`);
     for (line in stack) {
       console.log(`\n`.join("    ", line));
@@ -161,12 +140,75 @@ const main = (file_path, xul_frames, stacks, select, exclude) => {
     console.log();
     console.log();
   });
+
+  return c;
 };
 
-module.exports = {
-  convertLogToJSON,
-  findAndProcessLogs,
-  extractFrames,
-  processWin32KTraces,
-  main
-};
+// windbg commands to be executed
+let windbg_init_script = `
+* Set up logging to a file
+.logappend C:\Users\june\Source\win32k-stuff\win32k-log.txt
+
+* We want to debug our children. Strictly speaking we don't even care about
+* debugging ourselves!
+.childdbg 1
+
+* Load up the JS provider
+.load jsprovider.dll
+
+* Set up an exception handler for initial breakpoint to set up tracing
+sxe -c ".scriptrun C:\\Users\\june\\Source\\win32k-stuff\\win32k-tracing.js; g" ibp
+* Ignore all other exceptions (TODO: should this be 'sxd *'?)
+sxn -c "gn" \*
+* Ignore end process
+sxd epr
+
+* And we're of!
+gc
+`;
+
+if (process.env.LOCAL_FIREFOX_REPO) {
+  const mach_call = `python ${path.join(process.env.LOCAL_FIREFOX_REPO, 'mach')} run` +
+    ` --debugger=\"c:/Program Files (x86)/Windows Kits/10/Debuggers/x64/windbg.exe\"` +
+    ` --debugger-args="-c '\$\$<${path.join(process.cwd(), 'temp/dbg-script.txt')}' "`;
+}
+else {
+  console.error('No Firefox repo location defined in env variables');
+}
+
+// make sure that we have all of our folders
+if (!fs.existsSync('logs/')) {
+  fs.mkdirSync('logs/');
+}
+if (!fs.existsSync('logs/stand')) {
+  fs.mkdirSync('logs/stand/');
+}
+if (!fs.existsSync('logs/client')) {
+  fs.mkdirSync('logs/client');
+}
+if (!fs.existsSync('temp/')) {
+  fs.mkdirSync('temp/');
+}
+
+// const main = () => {
+if (program.standalone) {
+  console.log('starting firefox');
+  exec(mach_call, (error, stdout, stderr) => {
+    if (error) {
+      console.log(stderr);
+      throw error;
+    }
+    else {
+      console.log(stdout);
+    }
+  });
+}
+else if (program.client) {
+  console.log('client');
+}
+else {
+  program.help();
+}
+
+return true;
+// }

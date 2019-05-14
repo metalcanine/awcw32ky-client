@@ -4,22 +4,22 @@
   "description": "are we content win32k yet test client package",
   "main": "client.js",
   "scripts": {
-    "stubs": "/c/Program\\ Files\\ \\(x86\\)/Microsoft\\ Visual\\ Studio/2017/Community/VC/Tools/MSVC/14.10.25017/bin/HostX64/x64/dumpbin.exe //EXPORTS /c/Windows/System32/{win32kfull.sys,gdi32full.dll,user32.dll,win32k.sys,win32kbase.sys,win32u.sys} | grep -E “Nt(User|Gdi|DC)” | awk ‘{print $4}’ | grep -v “^__win32kstub” | sort | uniq > calls.txt",
-    "start": "echo \"Todo: enter start script call here \" && exit 1",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "npx rimraf logs/ node_modules/ temp/ .env",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --inspect src/client.js",
+    "start:s": "node src/client.js -s",
+    "start:c": "node src/client.js -c"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/metalcanine/awcw32ky-client.git"
-  },
+  "repository": "git+https://github.com/metalcanine/awcw32ky-client.git",
   "author": "Mozilla Platform Security",
   "license": "MPL-2.0",
-  "bugs": {
-    "url": "https://github.com/metalcanine/awcw32ky-client/issues"
-  },
+  "bugs": "https://github.com/metalcanine/awcw32ky-client/issues",
   "homepage": "https://github.com/metalcanine/awcw32ky-client#readme",
   "dependencies": {
-    "lodash": "^4.17.11",
-    "pg-promise": "^8.6.5"
+    "commander": "^2.20.0",
+    "dotenv": "^7.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^6.1.4"
   }
 }

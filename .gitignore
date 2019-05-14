@@ -6,6 +6,8 @@
 
 # node
 node_modules/
+.env
+dbg-script.txt
 
 # npm
 node_modules/
@@ -15,3 +17,7 @@ build/bundle.js
 build/index.html
 build*
 build/*
+
+# client
+temp/
+logs/
