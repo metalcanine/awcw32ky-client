@@ -163,7 +163,7 @@ sxn -c "gn" \*
 * Ignore end process
 sxd epr
 
-* And we're of!
+* And we're off!
 gc
 `;
 
