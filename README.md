@@ -24,7 +24,9 @@ Create a `.env` file in the base repo directory with `cp .env.sample .env`. The 
 
 You will also need to set any prefs required for your patches before start up, as this usage mode does not automatically set prefs like the client mode does.
 
-`npm run start:s` to start the browser normally under WinDbg. The resulting log will be in `logs/stand/`.
+`npm install --production` will get you just the npm packages (a total of 2) needed for standalone mode.
+
+`npm run start:s` to start the browser normally under WinDbg and the resulting log will be in `logs/stand/`.
 
 ### client
 
