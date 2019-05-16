@@ -186,7 +186,7 @@ fs.writeFileSync('temp/dbg-script.txt', windbg_init_script);
 
 // const main = () => {
 if (program.standalone) {
-  if (process.env.LOCAL_FIREFOX_REPO) {
+  if (process.env.LOCAL_FIREFOX_REPO && fs.existsSync(process.env.LOCAL_FIREFOX_REPO)) {
     const mach_call = `python ${path.join(process.env.LOCAL_FIREFOX_REPO, 'mach')} run` +
       ` --debugger=\"c:/Program Files (x86)/Windows Kits/10/Debuggers/x64/windbg.exe\"` +
       ` --debugger-args="-c '\$\$<${path.join(process.cwd(), 'temp/dbg-script.txt')}' "`;
@@ -203,7 +203,7 @@ if (program.standalone) {
     });
   }
   else {
-    console.error('No Firefox repo location defined in env variables');
+    console.error(`Firefox repo location is either not in .env or can't be found.`);
   }
 }
 else if (program.client) {
