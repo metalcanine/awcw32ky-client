@@ -10,9 +10,7 @@ Interacts with a [log server](https://www.github.com/metalcanine/arewecontentwin
 
 ## setup
 
-This is mostly the same as setting up a Windows machine to build Firefox, so if you already have that working all you should need is the Windows SDK 10.0.18362.0. For best results, run inside of mozillabuild's shell.
-
-
+This is mostly the same as setting up a Windows machine to build Firefox, so if you already have that working all you should need is the `Windows SDK 10.0.18362.0` (for WinDbg). For best results, run inside of mozillabuild's shell.
 
 ## usage
 
@@ -22,19 +20,22 @@ There are two ways to use this project, as a
 
 ### standalone
 
-This method is mainly purposed towards running Firefox under windbg with the win32k usage scripts more palatable.
+Create a `.env` file in the base repo directory with `cp .env.sample .env`. The main piece of info that you'll need to fill out is the LOCAL_FIREFOX_REPO variable which should be the full path to your copy of mozilla-central. Any environment variables defined here will also be passed on to Firefox at runtime.
 
-Create a `.env` file in the base repo directory with `cp .env.sample .env` and then just `npm run stand` to start the browser. The resulting log will be in `logs/stand/`.
+You will also need to set any prefs required for your patches before start up, as this usage mode does not automatically set prefs like the client mode does.
+
+`npm run start:s` to start the browser normally under WinDbg. The resulting log will be in `logs/stand/`.
 
 ### client
 
-`npm i && npm start` and hope for the best.
+`npm run start:c` will start in client mode and listen for jobs from the web server.
 
 ## environment
 
-| Variable              | Example Value                        | Explanation                                    |
-| --------------------- | ------------------------------------ | ---------------------------------------------- |
-| LOCAL_FIREFOX_REPO    | c:/Users/june/Source/mozilla-central | location on disk of mozilla-central repo       |
+| Variable                      | Example Value                        | Explanation                                    |
+| ----------------------------- | ------------------------------------ | ---------------------------------------------- |
+| LOCAL_FIREFOX_REPO            | c:/Users/june/Source/mozilla-central | location on disk of mozilla-central repo       |
+| MOZ_IGNORE_NSS_SHUTDOWN_LEAKS | true                                 | ignore shutdowns leaks in NSS                  |
 
 ## misc
 
