@@ -15,8 +15,10 @@ This is mostly the same as setting up a Windows machine to build Firefox, so if 
 ## usage
 
 There are two ways to use this project, as a
-  1. test stand to obtain win32k usage logs
-  2. client for [arewecontentwin32kyet](https:://github.com/metalcanine/arewecontentwin32kyet)
+  1. test stand to obtain win32k usage logs (standalone mode)
+  2. client for [arewecontentwin32kyet](https:://github.com/metalcanine/arewecontentwin32kyet) (client mode)
+
+`npm start` is also a viable option, and option flags can be passed in like `npm start -- -h`
 
 ### standalone
 
