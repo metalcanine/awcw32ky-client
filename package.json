@@ -5,10 +5,11 @@
   "main": "client.js",
   "scripts": {
     "clean": "npx rimraf logs/ node_modules/ temp/ .env",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha test",
     "start": "node --inspect src/client.js",
     "start:s": "node src/client.js -s",
-    "start:c": "node src/client.js -c"
+    "start:c": "node src/client.js -c",
+    "lint": "prettier --write src/**/*.js"
   },
   "repository": "git+https://github.com/metalcanine/awcw32ky-client.git",
   "author": "Mozilla Platform Security",
@@ -20,6 +21,7 @@
     "dotenv": "^7.0.0"
   },
   "devDependencies": {
-    "mocha": "^6.1.4"
+    "mocha": "^6.1.4",
+    "prettier": "^1.17.1"
   }
 }
