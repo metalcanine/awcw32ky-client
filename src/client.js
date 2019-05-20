@@ -161,7 +161,10 @@ if (program.standalone) {
 }
 // -c --client option
 else if (program.client) {
-  console.log('client');
+  console.log('listening for new jobs');
+  setInterval(() => {
+    console.log('boop');
+  }, process.env.CLIENT_POLLING_INTERVAL || 9000);
   return true;
 }
 // -r --reduce option
@@ -171,7 +174,9 @@ else if (program.reduce) {
   } else {
     fs.writeFileSync(
       program.reduce.split('.')[0] + 'condensed.log',
-      JSON.stringify(processWin32KTraces(fs.readFileSync(program.reduce, 'utf8'))),
+      JSON.stringify(
+        processWin32KTraces(fs.readFileSync(program.reduce, 'utf8'))
+      ),
       'utf8'
     );
     return true;
