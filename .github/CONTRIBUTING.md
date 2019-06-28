@@ -9,5 +9,5 @@ Code of Conduct
 
 This repository is governed by Mozilla's [Community Participation Guidelines][participation] and [Developer Etiquette Guidelines][etiquette].
 
-[participation]: https://github.com/metalcanine/awcw32ky-client/blob/master/CODE_OF_CONDUCT.md
+[participation]: https://github.com/metalcanine/awcw32ks-client/blob/master/CODE_OF_CONDUCT.md
 [etiquette]: https://bugzilla.mozilla.org/page.cgi?id=etiquette.html

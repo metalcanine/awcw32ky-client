@@ -1,12 +1,12 @@
 <h1 align="center">
-  <a href="https://www.arewecontentprocesswin32kyet.com">A(re)W(e)C(ontent)W(in)32KY(et)-Client</a>
+  <a href="https://www.arewecontentprocesswin32kstill.com">A(re)W(e)C(ontent)W(in)32KS(til)-Client</a>
 </h1>
 
 ## about
 
 A whole lot of complexity neatly wrapped up into a few javascript files running across a few separate javascript runtimes.
 
-Interacts with a [log server](https://www.github.com/metalcanine/arewecontentwin32kyet) to run specified tests in the Firefox test suite based on try pushes. This will help the Platform Security team isolate and remove Win32K system calls in content processes and remote them with the ultimate goal of turning on Windows' Win32K deny policy.
+Interacts with a [log server](https://www.github.com/metalcanine/arewecontentwin32kstill) to run specified tests in the Firefox test suite based on try pushes. This will help the Platform Security team isolate and remove Win32K system calls in content processes and remote them with the ultimate goal of turning on Windows' Win32K deny policy.
 
 ## setup
 
@@ -16,7 +16,7 @@ This is mostly the same as setting up a Windows machine to build Firefox, so if 
 
 There are two ways to use this project, as a
   1. test stand to obtain win32k usage logs (standalone mode)
-  2. client for [arewecontentwin32kyet](https:://github.com/metalcanine/arewecontentwin32kyet) (client mode)
+  2. client for [arewecontentwin32kstill](https:://github.com/metalcanine/arewecontentwin32kstil) (client mode)
 
 Running client.js directly with `node src/client.js` is also a viable option, and more option flags are available such as `node src/client.js -h`. This is preferable to `npm start` as it avoids npm's process startup overhead.
 
@@ -39,6 +39,7 @@ You will also need to set any prefs required for your patches before start up, a
 | Variable                      | Example Value                        | Explanation                                    |
 | ----------------------------- | ------------------------------------ | ---------------------------------------------- |
 | LOCAL_FIREFOX_REPO            | c:/Users/june/Source/mozilla-central | location on disk of mozilla-central repo       |
+| CLIENT_POLLING_INTERVAL       | 1000                                 | interval in ms at which to poll for new jobs   |
 | MOZ_IGNORE_NSS_SHUTDOWN_LEAKS | true                                 | ignore shutdowns leaks in NSS                  |
 
 ## misc

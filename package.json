@@ -1,24 +1,26 @@
 {
-  "name": "awcw32ky-client",
+  "name": "awcw32ks-client",
   "version": "1.0.0",
   "description": "are we content win32k yet test client package",
-  "main": "client.js",
+  "main": "app.js",
   "scripts": {
     "clean": "npx rimraf logs/ node_modules/ temp/ .env",
     "test": "mocha test",
-    "start": "node --inspect src/client.js",
-    "start:s": "node src/client.js -s",
-    "start:c": "node src/client.js -c",
+    "start": "node --inspect src/app.js",
+    "start:s": "node src/app.js -s",
+    "start:c": "node src/app.js -c",
     "lint": "prettier --write src/**/*.js"
   },
-  "repository": "git+https://github.com/metalcanine/awcw32ky-client.git",
+  "repository": "git+https://github.com/metalcanine/awcw32ks-client.git",
   "author": "Mozilla Platform Security",
   "license": "MPL-2.0",
-  "bugs": "https://github.com/metalcanine/awcw32ky-client/issues",
-  "homepage": "https://github.com/metalcanine/awcw32ky-client#readme",
+  "bugs": "https://github.com/metalcanine/awcw32ks-client/issues",
+  "homepage": "https://github.com/metalcanine/awcw32ks-client#readme",
   "dependencies": {
     "commander": "^2.20.0",
-    "dotenv": "^7.0.0"
+    "dotenv": "^7.0.0",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4"
   },
   "devDependencies": {
     "mocha": "^6.1.4",
