@@ -133,7 +133,7 @@ if (!fs.existsSync('temp/')) {
 
 if (program.standalone) {
   // windbg commands to be executed
-  let windbg_init_script = generateDebugScript(makeId(12), stand);
+  let windbg_init_script = generateDebugScript(makeId(12), 'stand');
 
   // write debug script out to file to sidestep having to
   fs.writeFileSync('temp/dbg-script.txt', windbg_init_script, 'utf8');
@@ -225,7 +225,7 @@ else if (program.client) {
         }
 
         currentJob = job;
-        generateDebugScript(currentJob.task, client);
+        generateDebugScript(currentJob.task, 'client');
 
         let envAdditions = JSON.parse(currentJob.mozharness);
 
@@ -259,6 +259,10 @@ else if (program.client) {
         );
       })
       .then((response) => {
+        if (!response) {
+          return;
+        }
+
         return execSync(
           `cd logs/client/${
             currentJob.task
@@ -277,6 +281,10 @@ else if (program.client) {
         );
       })
       .then((stdout) => {
+        if (!stdout) {
+          return;
+        }
+
         // pull stacks from stdout and upload them
         return processWin32KTraces(stdout).forEach((stack) => {
           request({
