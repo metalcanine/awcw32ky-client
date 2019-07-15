@@ -204,6 +204,12 @@ else if (program.client) {
           return console.log('no new jobs!');
         }
 
+        // windbg commands to be executed
+        windbg_init_script = generateDebugScript(makeId(12), 'stand');
+
+        // write debug script out to file to sidestep having to
+        fs.writeFileSync('temp/dbg-script.txt', windbg_init_script, 'utf8');
+
         return request({
           method: 'PUT',
           uri: `${process.env.SERVER_ADDRESS}api/jobs/${response[0].id}`,
