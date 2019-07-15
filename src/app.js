@@ -196,7 +196,7 @@ else if (program.client) {
     console.log('listening for new jobs');
     let windbg_init_script;
     request({
-      uri: `${process.env.SERVER_ADDRESS}api/jobs/pending`,
+      uri: `${process.env.SERVER_ADDRESS}api/jobs/new`,
       json: true,
     })
       .then((response) => {
