@@ -17,7 +17,7 @@
   "bugs": "https://github.com/metalcanine/awcw32ks-client/issues",
   "homepage": "https://github.com/metalcanine/awcw32ks-client#readme",
   "dependencies": {
-    "commander": "^2.20.1",
+    "commander": "^2.20.3",
     "dotenv": "^7.0.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.4"
