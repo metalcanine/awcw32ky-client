@@ -162,7 +162,7 @@ if (program.standalone) {
     path.join(process.env.LOCAL_FIREFOX_OBJDIR, 'tmp/profile-default/user.js'),
     (error) => {
       if (error) {
-        throw err;
+        throw error;
       } else {
         console.log('unable to copy user prefs files into build directory');
       }
