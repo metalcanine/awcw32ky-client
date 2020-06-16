@@ -23,7 +23,7 @@
     "dotenv": "^7.0.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
-    "snyk": "^1.323.1"
+    "snyk": "^1.327.0"
   },
   "devDependencies": {
     "mocha": "^6.1.4",
